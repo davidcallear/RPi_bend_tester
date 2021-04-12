@@ -10,7 +10,7 @@ from serial import Serial
 class GrblSerial(Serial):
     '''Control a GRBL with G-code on a Raspberry Pi.
     '''
-    def __init__(self, serial_port_glob='/dev/ttyUSB*', baud=115200, 
+    def __init__(self, serial_port_glob='/dev/ttyUSB*', baudrate=115200, 
                  min_z=-20, max_z=0, feed_rate=10):
         def is_number(var, var_name):
             '''Raise an error if `var` if not an int/float/Decimal
@@ -26,8 +26,8 @@ class GrblSerial(Serial):
         is_number(feed_rate, 'feed_rate')
         if not 0 < feed_rate <= 100:
             raise ValueError(f'feed_rate must be between 0 and 100, not {feed_rate}')
-        if not isinstance(baud, int):
-            raise TypeError(f'baud must be an int (eg. 115200), not {type(baud)}')
+        if not isinstance(baudrate, int):
+            raise TypeError(f'baudrate must be an int (eg. 115200), not {type(baudrate)}')
         
         self.min_z = min_z
         self.max_z = max_z
@@ -41,7 +41,7 @@ class GrblSerial(Serial):
         
         # run __init__ of Serial class
         print('Opening serial port...')
-        super().__init__(serial_port, baud)
+        super().__init__(serial_port, baudrate)
         
         print('Waking GRBL controller...')
         self.wake_grbl()
@@ -101,8 +101,26 @@ class GrblSerial(Serial):
         return grbl_out
     
     def move_to_z(self, new_z):
+        '''Move to a new Z position
+        Only move if within bounds
+        '''
         if not self.min_z <= new_z <= self.max_z:
             print(f'Z value of {new_z} mm is out of bounds')
             return
         gcode = f'G01 Z {new_z:.2f}'
+        self.current_z = new_z
         return self.write_gcode(gcode)
+    
+    def go_m_home(self):
+        '''Go to machine home
+        '''
+        self.write_gcode('G28')
+    
+    def finish(self):
+        '''Goes to machine home and closes serial port
+        '''
+        print('Going home...')
+        self.go_m_home()
+        print('Closing serial port...')
+        self.close()
+        print('Serial port safely closed')
