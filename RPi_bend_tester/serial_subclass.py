@@ -79,7 +79,7 @@ class GrblSerial(Serial):
         self.write_gcode('G10 L2 P1 Z0')
         self.write_gcode('G54')
 
-    def write_gcode(self, gcode):
+    def write_gcode(self, gcode, busy_check=True):
         r'''Write G-code to GRBL controller
 
         Adds '\n' to end of `gcode` so that G-code is done by GRBL controller.
@@ -94,7 +94,7 @@ class GrblSerial(Serial):
         if self.busy:
             return 'busy\r\n'
         # set port as busy
-        self.busy = True
+        self.busy = busy_check
         print(f'Sending G-code: {gcode}')
         gcode += '\n'
         # convert G-code to bytes
@@ -145,3 +145,8 @@ class GrblSerial(Serial):
         print('Closing serial port...')
         self.close()
         print('Serial port safely closed')
+
+    def cancel(self):
+        '''Brings GRBL to controlled stop
+        '''
+        return self.write_gcode('$!', busy_check=False)
