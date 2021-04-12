@@ -43,8 +43,11 @@ class GrblSerial(Serial):
         print('Opening serial port...')
         super().__init__(serial_port, baud)
         
+        print('Waking GRBL controller...')
         self.wake_grbl()
+        print('Initialising Grbl controller...')
         self.initialize()
+        print('#'*79, 'ready', sep='\n')
 
     def wake_grbl(self):
         '''Open serial port for GRBL controller.
@@ -96,3 +99,10 @@ class GrblSerial(Serial):
         print(f'GRBL response: {grbl_out}')
         self.busy = False
         return grbl_out
+    
+    def move_to_z(self, new_z):
+        if not self.min_z <= new_z <= self.max_z:
+            print(f'Z value of {new_z} mm is out of bounds')
+            return
+        gcode = f'G01 Z {new_z:.2f}'
+        return self.write_gcode(gcode)
