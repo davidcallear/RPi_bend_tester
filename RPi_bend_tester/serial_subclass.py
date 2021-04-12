@@ -2,7 +2,7 @@
 '''
 from decimal import Decimal
 from glob import glob
-from time import sleep
+from time import sleep, time
 
 from serial import Serial
 
@@ -34,10 +34,12 @@ class GrblSerial(Serial):
         self.feed_rate = feed_rate
         self.current_z = 0
         self.busy = False
+        # record when last movement should have finished
+        self.done_time = time()
         
         # find serial port (first matching `serial_port_glob`)
-        serial_ports = glob(serial_port_glob)
-        serial_port = serial_ports[0]
+        
+        serial_port = self.find_serial_port(serial_port_glob)
         
         # run __init__ of Serial class
         print('Opening serial port...')
@@ -48,6 +50,14 @@ class GrblSerial(Serial):
         print('Initialising Grbl controller...')
         self.initialize()
         print('#'*79, 'ready', sep='\n')
+
+    def find_serial_port(self, serial_port_glob='/dev/ttyUSB*'):
+        serial_ports = glob(serial_port_glob)
+        if len(serial_ports) == 0:
+            raise(FileNotFoundError(f'No match to glob: {serial_port_glob}'))
+        if len(serial_ports) == 1:
+            return serial_ports[0]
+        raise NotImplementedError('Too many serial ports found')
 
     def wake_grbl(self):
         '''Open serial port for GRBL controller.
@@ -107,9 +117,16 @@ class GrblSerial(Serial):
         if not self.min_z <= new_z <= self.max_z:
             print(f'Z value of {new_z} mm is out of bounds')
             return
+        if time() < self.done_time:
+            print('Previous Z movement not yet complete')
+            return
         gcode = f'G01 Z {new_z:.2f}'
-        self.current_z = new_z
-        return self.write_gcode(gcode)
+        grbl_out = self.write_gcode(gcode)
+        if grbl_out == 'ok\r\n':
+            execution_time = abs(self.current_z - new_z) / self.feed_rate
+            self.done_time = time() + execution_time
+            self.current_z = new_z
+        return grbl_out
     
     def go_m_home(self):
         '''Go to machine home
