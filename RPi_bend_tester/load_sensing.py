@@ -51,6 +51,7 @@ print('Value for tare:', tare_value)
 # plot values taken during initial pause (not used for value)
 formal_plot(find_x_values(tare_pause_values),
             tare_pause_values,
+            show=False
             )
 # plot vertical red line to seperate pause and value reading sections of graph
 plt.plot((len(tare_pause_values)-0.5,)*2,
@@ -60,12 +61,17 @@ plt.plot((len(tare_pause_values)-0.5,)*2,
 # plot values taken during averaging for given value
 (gradient, intercept), r_squared = formal_plot(find_x_values(tare_values),
                                                tare_values,
-                                               title='',
+                                               title='Values for tare: pause then actual',
+                                               x_title='Time since start of tare',
+                                               x_units='s',
+                                               y_title='Value of reading'
                                                )
 
 # Hopefully values are somewhat random, so r squared is close to zero
 print('Gradient = ', gradient)
 print('Intercept =', intercept)
+# r squared value will be nan if readings were unchanging
+# unchanging readings suggests hx711 isn't working/connected
 print('r squared =', r_squared)
 
 plt.show()
@@ -95,6 +101,7 @@ print('Value for measurement:', cal_value)
 # plot values taken during initial pause (not used for value)
 formal_plot(find_x_values(cal_pause_values),
             cal_pause_values,
+            show=False
             )
 # plot vertical red line to seperate pause and value reading sections of graph
 plt.plot((len(cal_pause_values)-0.5,)*2,
@@ -104,11 +111,17 @@ plt.plot((len(cal_pause_values)-0.5,)*2,
 # plot values taken during averaging for given value
 (gradient, intercept), r_squared = formal_plot(find_x_values(cal_values),
                                                cal_values,
+                                               title='Values for measurement: pause then actual',
+                                               x_title='Time since start of measurement',
+                                               x_units='s',
+                                               y_title='Value of reading'
                                                )
 
 # Hopefully values are somewhat random, so r squared is close to zero
 print('Gradient = ', gradient)
 print('Intercept =', intercept)
+# r squared value will be nan if readings were unchanging
+# unchanging readings suggests hx711 isn't working/connected
 print('r squared =', r_squared)
 
 print('Value for tare:', tare_value)
