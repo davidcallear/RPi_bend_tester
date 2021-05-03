@@ -37,22 +37,7 @@ except (KeyboardInterrupt, SystemExit):
 
 print("Tare done! Add weight now...")
 
-# wait for user to have added weight before proceeding
-input('Press enter once weight added')
-
-try:
-    # measure weight
-    # find average value, and readings during and after pause
-    cal_value, cal_pause_values, cal_values = hx.read_pulse_average(times=15,
-                                                                    duration=120,
-                                                                    spacing=SPACING,
-                                                                    pause=60
-                                                                    )
-except (KeyboardInterrupt, SystemExit):
-    cleanAndExit()
-
 print('Value for tare:', tare_value)
-print('Value for measurement:', cal_value)
 
 # plot results for tare
 # plot values taken during initial pause (not used for value)
@@ -77,6 +62,27 @@ print('r squared =', r_squared)
 
 plt.show()
 
+
+
+# wait for user to have added weight before proceeding
+input('Press enter once weight added')
+
+print('Now taking measurement...')
+try:
+    # measure weight
+    # find average value, and readings during and after pause
+    cal_value, cal_pause_values, cal_values = hx.read_pulse_average(times=15,
+                                                                    duration=120,
+                                                                    spacing=SPACING,
+                                                                    pause=60
+                                                                    )
+except (KeyboardInterrupt, SystemExit):
+    cleanAndExit()
+
+print('Measurement done!')
+
+print('Value for measurement:', cal_value)
+
 # plot results for measurement
 # plot values taken during initial pause (not used for value)
 formal_plot(tuple(range(0, len(cal_pause_values), SPACING)),
@@ -96,3 +102,6 @@ plt.plot((len(cal_pause_values)-0.5,)*2,
 print('Gradient = ', gradient)
 print('Intercept =', intercept)
 print('r squared =', r_squared)
+
+print('Value for tare:', tare_value)
+print('Value for measurement:', cal_value)
