@@ -75,7 +75,6 @@ simple_plot(find_x_values(all_tare_values),
             )
 
 plt.show(block=False)
-# Hopefully values are somewhat random, so r squared is close to zero
 
 
 
