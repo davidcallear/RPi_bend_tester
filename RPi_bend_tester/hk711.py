@@ -224,43 +224,31 @@ class HX711:
 
     # Compatibility function, uses channel A version
     def get_value(self, times=3):
-        return self.get_value_A(times)
-
-
-    def get_value_A(self, times=3):
-        return self.read_median(times) - self.get_offset_A()
+        return self.read_median(times) - self.get_offset()
 
 
     # Compatibility function, uses channel A version
     def get_weight(self, times=3):
-        return self.get_weight_A(times)
-
-
-    def get_weight_A(self, times=3):
-        value = self.get_value_A(times)
+        value = self.get_value(times)
         value = value / self.REFERENCE_UNIT
         return value
 
     
     # Sets tare for channel A for compatibility purposes
     def tare(self, times=15):
-        return self.tare_A(times)
-    
-    
-    def tare_A(self, times=15):
         # Backup REFERENCE_UNIT value
-        backupReferenceUnit = self.get_reference_unit_A()
-        self.set_reference_unit_A(1)
+        backupReferenceUnit = self.get_reference_unit()
+        self.set_reference_unit(1)
         
         value = self.read_average(times)
 
         if self.DEBUG_PRINTING:
             print("Tare A value:", value)
         
-        self.set_offset_A(value)
+        self.set_offset(value)
 
         # Restore the reference unit, now that we've got our offset.
-        self.set_reference_unit_A(backupReferenceUnit)
+        self.set_reference_unit(backupReferenceUnit)
 
         return value
 
@@ -285,36 +273,21 @@ class HX711:
 
     # sets offset for channel A for compatibility reasons
     def set_offset(self, offset):
-        self.set_offset_A(offset)
-
-    def set_offset_A(self, offset):
         self.OFFSET = offset
 
     def get_offset(self):
-        return self.get_offset_A()
-
-    def get_offset_A(self):
         return self.OFFSET
 
 
     def set_reference_unit(self, reference_unit):
-        self.set_reference_unit_A(reference_unit)
-
-        
-    def set_reference_unit_A(self, reference_unit):
         # Make sure we aren't asked to use an invalid reference unit.
         if reference_unit == 0:
-            raise ValueError("HX711::set_reference_unit_A() can't accept 0 as a reference unit!")
+            raise ValueError("HX711::set_reference_unit() can't accept 0 as a reference unit!")
             return
 
         self.REFERENCE_UNIT = reference_unit
 
-
     def get_reference_unit(self):
-        return get_reference_unit_A()
-
-        
-    def get_reference_unit_A(self):
         return self.REFERENCE_UNIT
         
         
@@ -334,7 +307,6 @@ class HX711:
         # Release the Read Lock, now that we've finished driving the HX711
         # serial interface.
         self.readLock.release()           
-
 
     def power_up(self):
         # Wait for and get the Read Lock, incase another thread is already
@@ -357,7 +329,6 @@ class HX711:
         # correct channel/gain.
         if self.get_gain() != 128:
             self.readRawBytes()
-
 
     def reset(self):
         self.power_down()
