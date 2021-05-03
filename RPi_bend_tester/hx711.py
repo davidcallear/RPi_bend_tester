@@ -156,6 +156,10 @@ class HX711:
         return int(signedIntValue)
 
     def read_average(self, times=3):
+        '''Find mean value of `times` readings
+        
+        Finds median instead if `times` is less than 5
+        '''
         # Make sure we've been asked to take a rational amount of samples.
         if times <= 0:
             raise ValueError("HX711()::read_average(): times must >= 1!!")
@@ -190,6 +194,8 @@ class HX711:
     # A median-based read method, might help when getting random value spikes
     # for unknown or CPU-related reasons
     def read_median(self, times=3):
+       '''Find median value of `times` readings
+       '''
        if times <= 0:
           raise ValueError("HX711::read_median(): times must be greater than zero!")
       
