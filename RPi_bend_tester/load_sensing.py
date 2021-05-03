@@ -54,7 +54,8 @@ formal_plot(find_x_values(tare_pause_values),
             show=False
             )
 # plot vertical red line to seperate pause and value reading sections of graph
-plt.plot((len(tare_pause_values)-0.5,)*2,
+separation_time = (len(tare_pause_values) - 0.5) * SPACING
+plt.plot((separation_time, separation_time),
          (0, max(tare_pause_values)),
          'r-'
 )
@@ -104,7 +105,8 @@ formal_plot(find_x_values(cal_pause_values),
             show=False
             )
 # plot vertical red line to seperate pause and value reading sections of graph
-plt.plot((len(cal_pause_values)-0.5,)*2,
+separation_time = (len(cal_pause_values) - 0.5) * SPACING
+plt.plot((separation_time, separation_time),
          (0, max(cal_pause_values)),
          'r-'
 )
