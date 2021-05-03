@@ -26,10 +26,8 @@ class HX711:
         # The value returned by the hx711 that corresponds to your reference
         # unit AFTER dividing by the SCALE.
         self.REFERENCE_UNIT = 1
-        self.REFERENCE_UNIT_B = 1
 
         self.OFFSET = 1
-        self.OFFSET_B = 1
         self.lastVal = int(0)
 
         self.DEBUG_PRINTING = False
@@ -233,14 +231,6 @@ class HX711:
         return self.read_median(times) - self.get_offset_A()
 
 
-    def get_value_B(self, times=3):
-        # for channel B, we need to set_gain(32)
-        g = self.get_gain()
-        self.set_gain(32)
-        value = self.read_median(times) - self.get_offset_B()
-        self.set_gain(g)
-        return value
-
     # Compatibility function, uses channel A version
     def get_weight(self, times=3):
         return self.get_weight_A(times)
@@ -249,11 +239,6 @@ class HX711:
     def get_weight_A(self, times=3):
         value = self.get_value_A(times)
         value = value / self.REFERENCE_UNIT
-        return value
-
-    def get_weight_B(self, times=3):
-        value = self.get_value_B(times)
-        value = value / self.REFERENCE_UNIT_B
         return value
 
     
@@ -280,30 +265,6 @@ class HX711:
         return value
 
 
-    def tare_B(self, times=15):
-        # Backup REFERENCE_UNIT value
-        backupReferenceUnit = self.get_reference_unit_B()
-        self.set_reference_unit_B(1)
-
-        # for channel B, we need to set_gain(32)
-        backupGain = self.get_gain()
-        self.set_gain(32)
-
-        value = self.read_average(times)
-
-        if self.DEBUG_PRINTING:
-            print("Tare B value:", value)
-        
-        self.set_offset_B(value)
-
-        # Restore gain/channel/reference unit settings.
-        self.set_gain(backupGain)
-        self.set_reference_unit_B(backupReferenceUnit)
-       
-        return value
-
-
-    
     def set_reading_format(self, byte_format="LSB", bit_format="MSB"):
         if byte_format == "LSB":
             self.byte_format = byte_format
@@ -329,20 +290,13 @@ class HX711:
     def set_offset_A(self, offset):
         self.OFFSET = offset
 
-    def set_offset_B(self, offset):
-        self.OFFSET_B = offset
-
     def get_offset(self):
         return self.get_offset_A()
 
     def get_offset_A(self):
         return self.OFFSET
 
-    def get_offset_B(self):
-        return self.OFFSET_B
 
-
-    
     def set_reference_unit(self, reference_unit):
         self.set_reference_unit_A(reference_unit)
 
@@ -355,15 +309,6 @@ class HX711:
 
         self.REFERENCE_UNIT = reference_unit
 
-        
-    def set_reference_unit_B(self, reference_unit):
-        # Make sure we aren't asked to use an invalid reference unit.
-        if reference_unit == 0:
-            raise ValueError("HX711::set_reference_unit_A() can't accept 0 as a reference unit!")
-            return
-
-        self.REFERENCE_UNIT_B = reference_unit
-
 
     def get_reference_unit(self):
         return get_reference_unit_A()
@@ -371,10 +316,6 @@ class HX711:
         
     def get_reference_unit_A(self):
         return self.REFERENCE_UNIT
-
-        
-    def get_reference_unit_B(self):
-        return self.REFERENCE_UNIT_B
         
         
     def power_down(self):
