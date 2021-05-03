@@ -6,7 +6,7 @@ import RPi.GPIO as GPIO
 
 from hx711 import HX711
 
-from graphs import formal_plot
+from graphs import simple_plot
 
 REFERENCE_UNIT = 1
 
@@ -60,19 +60,14 @@ print('Value for tare:', tare_value)
 # plot results for tare
 all_tare_values = tare_pause_values + tare_values
 # plot values taken during averaging for given value
-formal_plot(find_x_values(all_tare_values),
+simple_plot(find_x_values(all_tare_values),
             all_tare_values,
             title='Values for tare: pause then actual',
             x_title='Time since start of tare',
             x_units='s',
             y_title='Value of reading'
             )
-# plot vertical red line to seperate pause and value reading sections of graph
-separation_time = (len(tare_pause_values) - 0.5) * SPACING
-plt.plot((separation_time, separation_time),
-         (0, max(tare_pause_values)),
-         'r-'
-)
+
 plt.show(block=False)
 # Hopefully values are somewhat random, so r squared is close to zero
 
@@ -103,19 +98,14 @@ plt.show()
 # plot results for measurement
 all_cal_values = cal_pause_values + cal_values
 # plot values taken during averaging for given value
-formal_plot(find_x_values(all_cal_values),
+simple_plot(find_x_values(all_cal_values),
             all_cal_values,
             title='Values for measurement: pause then actual',
             x_title='Time since start of measurement',
             x_units='s',
             y_title='Value of reading'
             )
-# plot vertical red line to seperate pause and value reading sections of graph
-separation_time = (len(cal_pause_values) - 0.5) * SPACING
-plt.plot((separation_time, separation_time),
-         (0, max(cal_pause_values)),
-         'r-'
-)
+
 plt.show(block=False)
 
 print('Value for tare:', tare_value)
