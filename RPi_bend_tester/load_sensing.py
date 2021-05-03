@@ -58,13 +58,6 @@ print("Tare done! Add weight now...")
 print('Value for tare:', tare_value)
 
 # plot results for tare
-
-# plot vertical red line to seperate pause and value reading sections of graph
-separation_time = (len(tare_pause_values) - 0.5) * SPACING
-plt.plot((separation_time, separation_time),
-         (0, max(tare_pause_values)),
-         'r-'
-)
 all_tare_values = tare_pause_values + tare_values
 # plot values taken during averaging for given value
 (gradient, intercept), r_squared = formal_plot(find_x_values(all_tare_values),
@@ -74,15 +67,19 @@ all_tare_values = tare_pause_values + tare_values
                                                x_units='s',
                                                y_title='Value of reading'
                                                )
-
+# plot vertical red line to seperate pause and value reading sections of graph
+separation_time = (len(tare_pause_values) - 0.5) * SPACING
+plt.plot((separation_time, separation_time),
+         (0, max(tare_pause_values)),
+         'r-'
+)
+plt.show(block=False)
 # Hopefully values are somewhat random, so r squared is close to zero
 print('Gradient = ', gradient)
 print('Intercept =', intercept)
 # r squared value will be nan if readings were unchanging
 # unchanging readings suggests hx711 isn't working/connected
 print('r squared =', r_squared)
-
-plt.show()
 
 
 
@@ -105,27 +102,26 @@ print('Measurement done!')
 
 print('Value for measurement:', cal_value)
 
+print('Close current graph to see next graph')
+plt.show()
+
 # plot results for measurement
-# plot values taken during initial pause (not used for value)
-formal_plot(find_x_values(cal_pause_values),
-            cal_pause_values,
-            show=False
-            )
+all_cal_values = cal_pause_values + cal_values
+# plot values taken during averaging for given value
+(gradient, intercept), r_squared = formal_plot(find_x_values(all_cal_values),
+                                               all_cal_values,
+                                               title='Values for measurement: pause then actual',
+                                               x_title='Time since start of measurement',
+                                               x_units='s',
+                                               y_title='Value of reading'
+                                               )
 # plot vertical red line to seperate pause and value reading sections of graph
 separation_time = (len(cal_pause_values) - 0.5) * SPACING
 plt.plot((separation_time, separation_time),
          (0, max(cal_pause_values)),
          'r-'
 )
-# plot values taken during averaging for given value
-(gradient, intercept), r_squared = formal_plot(find_x_values(cal_values),
-                                               cal_values,
-                                               title='Values for measurement: pause then actual',
-                                               x_title='Time since start of measurement',
-                                               x_units='s',
-                                               y_title='Value of reading'
-                                               )
-
+plt.show(block=False)
 # Hopefully values are somewhat random, so r squared is close to zero
 print('Gradient = ', gradient)
 print('Intercept =', intercept)
