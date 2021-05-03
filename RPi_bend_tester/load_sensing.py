@@ -1,6 +1,9 @@
 from time import sleep, time
+import sys
 
+import matplotlib.pyplot as plt
 import RPi.GPIO as GPIO
+
 from hk711 import HK711
 
 from graphs import formal_plot
@@ -20,30 +23,35 @@ hx.set_reading_format("MSB", "MSB")
 hx.set_reference_unit(REFERENCE_UNIT)
 hx.reset()
 sleep(1)
-hx.tare()
+tare_value, tare_pause_values, tare_values = hx.tare()
 
 print("Tare done! Add weight now...")
 
-values = []
-start_time = time()
+input('Press enter to continue once calibration weight added')
 
-while time() - start_time < 60 * RUN_MINUTES:
-    try:
-        val = hx.get_weight(5)
-        values.append(val)
-        print(val)
+try:
+    cal_value, cal_pause_values, cal_values = hx.read_pulse_average(times=15,
+                                                                    duration=120,
+                                                                    spacing=5,
+                                                                    pause=60
+                                                                    )
+except (KeyboardInterrupt, SystemExit):
+    cleanAndExit()
 
-        hx.power_down()
-        hx.power_up()
-        sleep(0.1)
 
-    except (KeyboardInterrupt, SystemExit):
-        cleanAndExit()
-
-start_index = len(values) * 3 // RUN_MINUTES
-stable_values = values[start_index:]
-
-formal_plot(tuple(range(len(stable_values))),
-            stable_values,
-            title='Runtime (/ ~0.1s) against Load cell reading'
+formal_plot(tuple(range(len(tare_pause_values))),
+            tare_pause_values,
             )
+
+plt.plot((len(tare_pause_values)-0.,)*2,
+         (0, max(tare_pause_values)),
+         'r-'
+)
+
+(gradient, intercept), r_squared = formal_plot(tuple(range(len(tare_values))),
+                                               tare_values,
+                                               )
+
+print('Gradient = ', gradient)
+print('Intercept =', intercept)
+print('r squared =', r_squared)
