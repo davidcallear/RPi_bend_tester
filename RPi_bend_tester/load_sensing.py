@@ -45,11 +45,11 @@ sleep(1)
 print('Now doing tare...')
 # find average value, and readings during and after pause
 try:
-    tare_value, tare_pause_values, tare_values = hx.tare((times=TIMES,
-                                                          duration=DURATION,
-                                                          spacing=SPACING,
-                                                          pause=PAUSE
-                                                          )
+    tare_value, tare_pause_values, tare_values = hx.tare(times=TIMES,
+                                                         duration=DURATION,
+                                                         spacing=SPACING,
+                                                         pause=PAUSE
+                                                        )
 except (KeyboardInterrupt, SystemExit):
     cleanAndExit()
 
