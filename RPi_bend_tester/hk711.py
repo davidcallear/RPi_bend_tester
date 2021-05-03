@@ -1,7 +1,7 @@
 #
 
 import RPi.GPIO as GPIO
-import time
+from time import sleep
 import threading
 
 
@@ -38,7 +38,7 @@ class HX711:
         self.set_gain(gain)
 
         # Think about whether this is necessary.
-        time.sleep(1)
+        sleep(1)
 
         
     def convertFromTwosComplement24bit(self, inputValue):
@@ -215,6 +215,39 @@ class HX711:
           midpoint = len(valueList) // 2
           return sum(valueList[midpoint-1:midpoint]) / 2.0
 
+    def read_pulse_average(self, times=15, duration=120, spacing=5, pause=60):
+        '''Find average reading
+        
+        Designed to take minutes - useful for tare and calibration.
+        
+        Reads value `times` many times repeatedly with a `spacing` seconds
+        gap between repeats for `duration` seconds.
+        
+        `duration` and `pause` may be reduced by `spacing` in practice due to rounding down
+        Will not occur if `spacing` is a factor of  `duration` and/or `pause`
+        
+        Kwargs:
+            times (int): number of values taken on each repeat
+            duration (int): total time taken for tare (seconds)
+            spacing (int): time between repeats (seconds)
+            pause (int): time paused before readings for actual tare taken
+        '''
+        # record measurements during pause for debugging purposes
+        number_repeats = pause // spacing
+        pause_values = []
+        for _ in range(number_repeats):
+            pause_values.append(self.read_average(times))
+            sleep(spacing)
+
+        # take values for tare
+        number_repeats = duration // spacing
+        values = []
+        for _ in range(number_repeats):
+            values.append(self.read_average(times))
+            sleep(spacing)
+        value = sum(values) / len(values)
+
+        return value, pause_values, values
 
     # Compatibility function, uses channel A version
     def get_value(self, times=3):
@@ -228,22 +261,40 @@ class HX711:
 
     
     # Sets tare for channel A for compatibility purposes
-    def tare(self, times=15):
+    def tare(self, times=15, duration=120, spacing=5, pause=60):
+        '''Find reading at zero weight
+        
+        Reads value `times` many times repeatedly with a `spacing` seconds
+        gap between repeats for `duration` seconds.
+        
+        `duration` and `pause` may be reduced by `spacing` in practice due to rounding down
+        Will not occur if `spacing` is a factor of  `duration` and/or `pause`
+        
+        Kwargs:
+            times (int): number of values taken on each repeat
+            duration (int): total time taken for tare (seconds)
+            spacing (int): time between repeats (seconds)
+            pause (int): time paused before readings for actual tare taken
+        '''
         # Backup REFERENCE_UNIT value
         backupReferenceUnit = self.get_reference_unit()
         self.set_reference_unit(1)
-        
-        value = self.read_average(times)
+
+        value, pause_values, values = self.read_pulse_average(times=times,
+                                                              duration=duration,
+                                                              spacing=spacing,
+                                                              pause=pause
+                                                              )
 
         if self.DEBUG_PRINTING:
-            print("Tare A value:", value)
+            print("Tare value:", value)
         
         self.set_offset(value)
 
         # Restore the reference unit, now that we've got our offset.
         self.set_reference_unit(backupReferenceUnit)
 
-        return value
+        return value, pause_values, values
 
 
     def set_reading_format(self, byte_format="LSB", bit_format="MSB"):
@@ -293,7 +344,7 @@ class HX711:
         GPIO.output(self.PD_SCK, False)
         GPIO.output(self.PD_SCK, True)
 
-        time.sleep(0.0001)
+        sleep(0.0001)
 
         # Release the Read Lock, now that we've finished driving the HX711
         # serial interface.
@@ -308,7 +359,7 @@ class HX711:
         GPIO.output(self.PD_SCK, False)
 
         # Wait 100 us for the HX711 to power back up.
-        time.sleep(0.0001)
+        sleep(0.0001)
 
         # Release the Read Lock, now that we've finished driving the HX711
         # serial interface.
