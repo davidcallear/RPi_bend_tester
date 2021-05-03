@@ -1,5 +1,3 @@
-#
-
 import RPi.GPIO as GPIO
 from time import sleep
 import threading
@@ -218,7 +216,7 @@ class HX711:
     def read_pulse_average(self, times=15, duration=120, spacing=5, pause=60):
         '''Find average reading
         
-        Designed to take minutes - useful for tare and calibration.
+        Designed to take measurements - useful for tare and calibration.
         
         Reads value `times` many times repeatedly with a `spacing` seconds
         gap between repeats for `duration` seconds.
@@ -262,19 +260,18 @@ class HX711:
     
     # Sets tare for channel A for compatibility purposes
     def tare(self, times=15, duration=120, spacing=5, pause=60):
-        '''Find reading at zero weight
+        '''Find reading at zero weight, and tare balance
         
-        Reads value `times` many times repeatedly with a `spacing` seconds
-        gap between repeats for `duration` seconds.
+        Finds average value using self.read_pulse_average
         
-        `duration` and `pause` may be reduced by `spacing` in practice due to rounding down
-        Will not occur if `spacing` is a factor of  `duration` and/or `pause`
+        Sets offset to value found
         
         Kwargs:
             times (int): number of values taken on each repeat
             duration (int): total time taken for tare (seconds)
             spacing (int): time between repeats (seconds)
             pause (int): time paused before readings for actual tare taken
+        Returns:
         '''
         # Backup REFERENCE_UNIT value
         backupReferenceUnit = self.get_reference_unit()
