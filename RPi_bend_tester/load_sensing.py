@@ -63,7 +63,7 @@ all_tare_values = tare_pause_values + tare_values
 simple_plot(find_x_values(all_tare_values),
             all_tare_values,
             title='Values for tare: pause then actual',
-            x_title='Time since start of tare',
+            x_title=f'Time since start of tare (pause ends at {PAUSE})',
             x_units='s',
             y_title='Value of reading'
             )
@@ -101,7 +101,7 @@ all_cal_values = cal_pause_values + cal_values
 simple_plot(find_x_values(all_cal_values),
             all_cal_values,
             title='Values for measurement: pause then actual',
-            x_title='Time since start of measurement',
+            x_title=f'Time since start of measurement (pause ends at {PAUSE})',
             x_units='s',
             y_title='Value of reading'
             )
