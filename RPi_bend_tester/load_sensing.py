@@ -4,7 +4,7 @@ import sys
 import matplotlib.pyplot as plt
 import RPi.GPIO as GPIO
 
-from hk711 import HX711
+from hx711 import HX711
 
 from graphs import formal_plot
 
