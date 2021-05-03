@@ -8,13 +8,19 @@ from hx711 import HX711
 
 from graphs import simple_plot
 
+# adjust this to calibrate weight readings
 REFERENCE_UNIT = 1
 
 # options for measurement timings
+# number of readings taken on each pulse of readings
 TIMES = 15
-DURATION = 45
-SPACING = 1
-PAUSE = 15
+# time between pulses of readings
+SPACING = 5
+# time to pause before taking average
+PAUSE = 60
+# time to take average for
+DURATION = 120
+# NB: total reading duration will be PAUSE + DURATION for each reading
 
 
 # allow for clean exit (through keyboard interrupt) from long measurement readings
