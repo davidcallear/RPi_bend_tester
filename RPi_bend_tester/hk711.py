@@ -48,7 +48,7 @@ class HX711:
     def is_ready(self):
         return GPIO.input(self.DOUT) == 0
 
-    
+
     def set_gain(self, gain):
         if gain is 128:
             self.GAIN = 1
@@ -62,7 +62,6 @@ class HX711:
         # Read out a set of raw bytes and throw it away.
         self.readRawBytes()
 
-        
     def get_gain(self):
         if self.GAIN == 1:
             return 128
@@ -71,8 +70,7 @@ class HX711:
         if self.GAIN == 2:
             return 32
 
-        # Shouldn't get here.
-        return 0
+        raise RuntimeError(f'self.GAIN should be 1, 3, or 2 - not {self.GAIN}')
         
 
     def readNextBit(self):
@@ -86,13 +84,12 @@ class HX711:
        # Convert Boolean to int and return it.
        return int(value)
 
-
     def readNextByte(self):
        byteValue = 0
 
        # Read bits and build the byte from top, or bottom, depending
        # on whether we are in MSB or LSB bit mode.
-       for x in range(8):
+       for _ in range(8):
           if self.bit_format == 'MSB':
              byteValue <<= 1
              byteValue |= self.readNextBit()
@@ -103,7 +100,6 @@ class HX711:
        # Return the packed byte.
        return byteValue 
         
-
     def readRawBytes(self):
         # Wait for and get the Read Lock, incase another thread is already
         # driving the HX711 serial interface.
@@ -120,7 +116,7 @@ class HX711:
 
         # HX711 Channel and gain factor are set by number of bits read
         # after 24 data bits.
-        for i in range(self.GAIN):
+        for _ in range(self.GAIN):
            # Clock a bit out of the HX711 and throw it away.
            self.readNextBit()
 
@@ -131,9 +127,9 @@ class HX711:
         # Depending on how we're configured, return an orderd list of raw byte
         # values.
         if self.byte_format == 'LSB':
-           return [thirdByte, secondByte, firstByte]
+           return thirdByte, secondByte, firstByte
         else:
-           return [firstByte, secondByte, thirdByte]
+           return firstByte, secondByte, thirdByte
 
 
     def read_long(self):
@@ -161,7 +157,6 @@ class HX711:
         # Return the sample value we've read from the HX711.
         return int(signedIntValue)
 
-    
     def read_average(self, times=3):
         # Make sure we've been asked to take a rational amount of samples.
         if times <= 0:
@@ -180,8 +175,8 @@ class HX711:
         # the outliers, then take the mean of the remaining set.
         valueList = []
 
-        for x in range(times):
-            valueList += [self.read_long()]
+        for _ in range(times):
+            valueList.append(self.read_long())
 
         valueList.sort()
 
@@ -193,7 +188,6 @@ class HX711:
 
         # Return the mean of remaining samples.
         return sum(valueList) / len(valueList)
-
 
     # A median-based read method, might help when getting random value spikes
     # for unknown or CPU-related reasons
@@ -207,8 +201,8 @@ class HX711:
 
        valueList = []
 
-       for x in range(times):
-          valueList += [self.read_long()]
+       for _ in range(times):
+          valueList.append(self.read_long())
 
        valueList.sort()
 
@@ -218,14 +212,13 @@ class HX711:
        else:
           # If times is even we have to take the arithmetic mean of
           # the two middle values.
-          midpoint = len(valueList) / 2
-          return sum(valueList[midpoint:midpoint+2]) / 2.0
+          midpoint = len(valueList) // 2
+          return sum(valueList[midpoint-1:midpoint]) / 2.0
 
 
     # Compatibility function, uses channel A version
     def get_value(self, times=3):
         return self.read_median(times) - self.get_offset()
-
 
     # Compatibility function, uses channel A version
     def get_weight(self, times=3):
@@ -259,16 +252,14 @@ class HX711:
         elif byte_format == "MSB":
             self.byte_format = byte_format
         else:
-            raise ValueError("Unrecognised byte_format: \"%s\"" % byte_format)
+            raise ValueError(f"Unrecognised byte_format: {byte_format}")
 
         if bit_format == "LSB":
             self.bit_format = bit_format
         elif bit_format == "MSB":
             self.bit_format = bit_format
         else:
-            raise ValueError("Unrecognised bitformat: \"%s\"" % bit_format)
-
-            
+            raise ValueError(f"Unrecognised byte_format: {byte_format}")
 
 
     # sets offset for channel A for compatibility reasons
@@ -289,8 +280,8 @@ class HX711:
 
     def get_reference_unit(self):
         return self.REFERENCE_UNIT
-        
-        
+
+
     def power_down(self):
         # Wait for and get the Read Lock, incase another thread is already
         # driving the HX711 serial interface.
