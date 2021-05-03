@@ -9,7 +9,13 @@ from hx711 import HX711
 from graphs import formal_plot
 
 REFERENCE_UNIT = 1
-SPACING = 5
+
+# options for measurement timings
+TIMES = 15
+DURATION = 45
+SPACING = 1
+PAUSE = 15
+
 
 # allow for clean exit (through keyboard interrupt) from long measurement readings
 def cleanAndExit():
@@ -39,7 +45,11 @@ sleep(1)
 print('Now doing tare...')
 # find average value, and readings during and after pause
 try:
-    tare_value, tare_pause_values, tare_values = hx.tare()
+    tare_value, tare_pause_values, tare_values = hx.tare((times=TIMES,
+                                                          duration=DURATION,
+                                                          spacing=SPACING,
+                                                          pause=PAUSE
+                                                          )
 except (KeyboardInterrupt, SystemExit):
     cleanAndExit()
 
@@ -48,20 +58,17 @@ print("Tare done! Add weight now...")
 print('Value for tare:', tare_value)
 
 # plot results for tare
-# plot values taken during initial pause (not used for value)
-formal_plot(find_x_values(tare_pause_values),
-            tare_pause_values,
-            show=False
-            )
+
 # plot vertical red line to seperate pause and value reading sections of graph
 separation_time = (len(tare_pause_values) - 0.5) * SPACING
 plt.plot((separation_time, separation_time),
          (0, max(tare_pause_values)),
          'r-'
 )
+all_tare_values = tare_pause_values + tare_values
 # plot values taken during averaging for given value
-(gradient, intercept), r_squared = formal_plot(find_x_values(tare_values),
-                                               tare_values,
+(gradient, intercept), r_squared = formal_plot(find_x_values(all_tare_values),
+                                               all_tare_values,
                                                title='Values for tare: pause then actual',
                                                x_title='Time since start of tare',
                                                x_units='s',
@@ -86,10 +93,10 @@ print('Now taking measurement...')
 try:
     # measure weight
     # find average value, and readings during and after pause
-    cal_value, cal_pause_values, cal_values = hx.read_pulse_average(times=15,
-                                                                    duration=120,
+    cal_value, cal_pause_values, cal_values = hx.read_pulse_average(times=TIMES,
+                                                                    duration=DURATION,
                                                                     spacing=SPACING,
-                                                                    pause=60
+                                                                    pause=PAUSE
                                                                     )
 except (KeyboardInterrupt, SystemExit):
     cleanAndExit()
