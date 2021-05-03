@@ -18,6 +18,14 @@ def cleanAndExit():
     print("Bye!")
     sys.exit()
 
+def find_x_values(y_values):
+    '''Find x values for graph given y values
+    
+    Returns a tuple of the same length as `y_values`
+        (0, SPACING, SPACING*2, SPACING*3, SPACING*4, SPACING*5, SPACING*6, ...)
+    '''
+    return tuple(i * SPACING for i in range(0, len(y_values)))
+
 # initialize HK711:
 # pin for dout (input pin) -> 5
 # pin for pd_sck (output pin) -> 6
@@ -41,7 +49,7 @@ print('Value for tare:', tare_value)
 
 # plot results for tare
 # plot values taken during initial pause (not used for value)
-formal_plot(tuple(range(0, len(tare_pause_values), SPACING)),
+formal_plot(find_x_values(tare_pause_values),
             tare_pause_values,
             )
 # plot vertical red line to seperate pause and value reading sections of graph
@@ -50,7 +58,7 @@ plt.plot((len(tare_pause_values)-0.5,)*2,
          'r-'
 )
 # plot values taken during averaging for given value
-(gradient, intercept), r_squared = formal_plot(tuple(range(0, len(tare_values), SPACING)),
+(gradient, intercept), r_squared = formal_plot(find_x_values(tare_values),
                                                tare_values,
                                                title='',
                                                )
@@ -85,7 +93,7 @@ print('Value for measurement:', cal_value)
 
 # plot results for measurement
 # plot values taken during initial pause (not used for value)
-formal_plot(tuple(range(0, len(cal_pause_values), SPACING)),
+formal_plot(find_x_values(cal_pause_values),
             cal_pause_values,
             )
 # plot vertical red line to seperate pause and value reading sections of graph
@@ -94,7 +102,7 @@ plt.plot((len(cal_pause_values)-0.5,)*2,
          'r-'
 )
 # plot values taken during averaging for given value
-(gradient, intercept), r_squared = formal_plot(tuple(range(0, len(cal_values), SPACING)),
+(gradient, intercept), r_squared = formal_plot(find_x_values(cal_values),
                                                cal_values,
                                                )
 
