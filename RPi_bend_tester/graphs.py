@@ -104,6 +104,58 @@ def formal_plot(x, y, y_error=None, title='', x_title='', y_title='', x_units=[]
         plt.show(block=False)
     return trend_info
 
+def simple_plot(x, y, title='', x_title='', y_title='', x_units=[], y_units=[], show=True):
+    '''Plots a `x` and `y` for a formal looking graph.
+    
+    Args:
+        x (tuple/list/numpy.ndarray): values of data points for the horizontal axis
+        y (tuple/list/numpy.ndarray): values of data points for the vertical axis
+    Kwargs:
+        title (str): title of the graph
+        x_title (str): label for horizontal axis (excluding units)
+        y_title (str): label for vertical axis (excluding units)
+        x_units (tuple[tuple]): of (unit (str), exponent (int/str)) pairs for units of the horizontal axis
+        y_units (tuple[tuple]): of (unit (str), exponent (int/str)) pairs for units of the vertical axis
+        show (bool): whether to show the graph (plt.show(block=False))
+    Returns:
+        None
+    '''
+    def make_latex(units):
+        '''Convert list of units and their exponents to latex (using superscripts).
+        A unit without an exponent is assumed to be raised to the power of one.
+        Exponents can be expressed as int or str.
+        
+        Args:
+            units (iterable): of list/tuple of unit-exponent pairs
+        Returns:
+            str: string that will be interpretted as latex by matplotlib
+        
+        Examples:
+        >>> make_latex([['kJ',1], 'N', ['m',2], ['s', -2]])
+        '$kJ\\ N\\ m^{2}\\ s^{-2}$'
+        '''
+        # convert str values in units to have a power of 1
+        units = ((unit, 1) if isinstance(unit, str) else unit for unit in units)
+        latex = r'\ '.join(unit[0] if unit[1] == 1 
+                           else f'{unit[0]}^{{{unit[1]}}}'
+                           for unit in units)
+        return '$' + latex + '$'
+        
+    plt.scatter(x, y, c='k', marker='x')
+    
+    plt.title(title)
+    if x_units:
+        plt.xlabel(' / '.join((x_title, make_latex(x_units))))
+    else:
+        plt.xlabel(x_title)
+    if y_units:
+        plt.ylabel(' / '.join((y_title, make_latex(y_units))))
+    else:
+        plt.ylabel(y_title)
+    
+    if show:
+        plt.show(block=False)
+
 def chi_r_2(observed, observed_error, expected, ddof=0):
     '''Performs reduced chi squared statistic.
     <1 implies overfitting (errors too large)
